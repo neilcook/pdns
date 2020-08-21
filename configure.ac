@@ -224,6 +224,9 @@ PDNS_WITH_PROTOBUF
 
 PDNS_WITH_LUA_RECORDS
 
+PDNS_ENABLE_BENCHMARKS
+AM_CONDITIONAL([HAVE_BENCHMARK], [test "x$BENCHMARK_LIBS" != "x"])
+
 AM_CONDITIONAL([LDAP], [test "x$needldap" = "xyes"])
 
 PDNS_CHECK_SQLITE3
@@ -317,6 +320,7 @@ AC_CONFIG_FILES([
   Makefile
   modules/Makefile
   pdns/Makefile
+  pdns/benchmarks/Makefile
   codedocs/Makefile
   docs/Makefile
   pdns/pdns.init
