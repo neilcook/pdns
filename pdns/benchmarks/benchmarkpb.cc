@@ -6,6 +6,7 @@
 #include <boost/uuid/string_generator.hpp>
 #include "iputils.hh"
 #include "rec-protobuf.hh"
+#include "dnsrecords.hh"
 
 #include <benchmark/benchmark.h>
 
@@ -61,8 +62,8 @@ boost::uuids::uuid u1 = gen("{01234567-89ab-cdef-0123-456789abcdef}");
 ComboAddress req("10.2.3.4");
 ComboAddress resp("10.2.3.6");
 DNSName dn("example.com.");
+DNSName dnr("example.com.");
 std::string serverID("myhost");
-DNSResourceRecord drr;
 std::string appliedPolicy("some-policy");
 std::unordered_set<std::string> policyTags = {
   "tag1",
@@ -79,16 +80,12 @@ void PDNSCreateMessage() {
 
   m.setQuestion(dn, 1, 1);
 
-  drr.qname = dn;
-  drr.content = "10.2.3.4 2 ABCD"; // I have no idea what the format is, but this parses at least
-  drr.qtype = QType(1);
-  drr.qclass = 1;
+  DNSRecord dr;
+  dr.d_type = QType::A;
+  dr.d_content = DNSRecordContent::mastermake(QType::A, QClass::IN, "192.0.2.142");
+  dr.d_name = std::move(dnr);
   
-  std::vector<DNSRecord> rrs = {
-    DNSRecord(drr)
-  };
-
-  m.addRRs(rrs, std::set<uint16_t>());
+  m.addRRs({dr}, {QType::A});
   m.setAppliedPolicy(appliedPolicy);
 
   m.setPolicyTags(policyTags);
@@ -165,6 +162,7 @@ static void BM_NoArenaReuseMessage(benchmark::State& state) {
 BENCHMARK(BM_NoArenaReuseMessage);
 
 static void BM_NoArenaPDNSMessage(benchmark::State& state) {
+  reportBasicTypes();
   for (auto _ : state) {
     PDNSCreateMessage();
   }
