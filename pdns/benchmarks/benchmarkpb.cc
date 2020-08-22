@@ -73,19 +73,14 @@ Netmask subnet(ComboAddress("1.2.3.4"), 16);
 std::string req_id("some-subscriber");
 
 __attribute__((noinline))
-void PDNSCreateMessage() {
+void PDNSCreateMessage(const std::vector<DNSRecord>& rrs) {
   RecProtoBufMessage m(DNSProtoBufMessage::Response, u1, &req, &resp, dn, 1, 1, 1223, true, rand() % 12345);
   m.setServerIdentity(serverID);
   m.setTime(1597761828, 10000);
 
   m.setQuestion(dn, 1, 1);
-
-  DNSRecord dr;
-  dr.d_type = QType::A;
-  dr.d_content = DNSRecordContent::mastermake(QType::A, QClass::IN, "192.0.2.142");
-  dr.d_name = std::move(dnr);
   
-  m.addRRs({dr}, {QType::A});
+  m.addRRs(rrs, {QType::A});
   m.setAppliedPolicy(appliedPolicy);
 
   m.setPolicyTags(policyTags);
@@ -97,7 +92,7 @@ void PDNSCreateMessage() {
   m.setRequestorPort(1234);
   m.setResponderPort(53);
 
-  m.serialize(lastPB);
+  //m.serialize(lastPB);
 }
 
 
@@ -163,8 +158,15 @@ BENCHMARK(BM_NoArenaReuseMessage);
 
 static void BM_NoArenaPDNSMessage(benchmark::State& state) {
   reportBasicTypes();
+  // Precreate the DNSRecord array to simulate what happens in recursor
+  DNSRecord dr;
+  dr.d_type = QType::A;
+  dr.d_content = DNSRecordContent::mastermake(QType::A, QClass::IN, "192.0.2.142");
+  dr.d_name = dnr;
+  std::vector<DNSRecord> rrs = { dr };
+  
   for (auto _ : state) {
-    PDNSCreateMessage();
+    PDNSCreateMessage(rrs);
   }
 }
 BENCHMARK(BM_NoArenaPDNSMessage);
