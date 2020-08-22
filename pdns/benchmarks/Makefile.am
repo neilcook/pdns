@@ -1,4 +1,3 @@
-if UNIT_TESTS
 if HAVE_PROTOBUF
 if HAVE_PROTOC
 if HAVE_BENCHMARK
@@ -75,9 +74,3 @@ benchmarkpb$(OBJEXT): dnsmessage.pb.cc
 endif
 endif
 endif
-else
-check-local:
-	@echo "Unit tests are not enabled"
-	@echo "Run ./configure --enable-unit-tests"
-endif
-
