@@ -1,5 +1,4 @@
 AC_DEFUN([PDNS_ENABLE_BENCHMARKS], [
-  AC_REQUIRE([PDNS_CHECK_BENCHMARK])
   AC_MSG_CHECKING([whether we will be building benchmark tools])
   AC_ARG_ENABLE([benchmarks],
     [AS_HELP_STRING([--enable-benchmarks], [if we should build benchmark tools @<:@default=no@:>@])],
@@ -9,4 +8,7 @@ AC_DEFUN([PDNS_ENABLE_BENCHMARKS], [
   AC_MSG_RESULT([$enable_benchmarks])
 
   AM_CONDITIONAL([BENCHMARKS], [test "x$enable_benchmarks" != "xno"])
+  AS_IF([test "x$enable_benchmarks" != "xno"], [
+    PDNS_CHECK_BENCHMARK
+  ])
 ])
